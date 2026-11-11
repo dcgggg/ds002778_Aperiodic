@@ -7,8 +7,16 @@ setpath8 = ['D:\Project\paper4\5_fooofresult\pdon\'];savepath8=['D:\Project\pape
 cd(setpath5);
 %%
 cd(setpath5);
-for i=1:32
-fooof_plot(fooof_results(i),0)
+resultfile= dir([setpath5,'*.mat']);
+file_name =natsort({resultfile.name}, '[-+]?(NaN|Inf|\d+\.?\d*)');
+if isempty(file_name)
+    error('No fooof result files found in %s', setpath5);
+end
+preview = load(fullfile(setpath5, file_name{1}), 'fooof_results');
+fooof_results = preview.fooof_results;
+freqs = get_freqs_from_fooof_results(fooof_results);
+for i=1:numel(fooof_results)
+    fooof_plot(fooof_results(i),0);
 end
 %% Overall browsing data
 cd(setpath5);
@@ -16,53 +24,67 @@ resultfile= dir([setpath5,'*.mat']);
 file_name =natsort({resultfile.name}, '[-+]?(NaN|Inf|\d+\.?\d*)');
 errors=[];r_squareds=[];offsets=[];exponents=[];power_spectrums=[];fooofed_spectrums=[];ap_fits=[];
 for m=1:length(resultfile)
-load(file_name{m});
+    data = load(fullfile(setpath5, file_name{m}), 'fooof_results');
+    fooof_results = data.fooof_results;
     error = cat(1,fooof_results.error); errors = [errors,error];
     r_squared = cat(1,fooof_results.r_squared); r_squareds = [r_squareds,r_squared];
     aperiodic_param = cat(1,fooof_results.aperiodic_params);
     offset = aperiodic_param(:,1); offsets = [offsets,offset];
     exponent = aperiodic_param(:,2); exponents =[exponents,exponent];
-    peak_param = cat(1,fooof_results.peak_params);gaussian_param= cat(1,fooof_results.gaussian_params);%由于每个通道的峰值参数和高斯参数维度不一致，故不能组建矩阵
+    peak_param = cat(1,fooof_results.peak_params);gaussian_param= cat(1,fooof_results.gaussian_params);%由于每个通道的峰值参数和
+高斯参数维度不一致，故不能组建矩阵
     power_spectrum = cat(1,fooof_results.power_spectrum);power_spectrums = cat(3,power_spectrums,power_spectrum);
     fooofed_spectrum = cat(1,fooof_results.fooofed_spectrum);fooofed_spectrums = cat(3,fooofed_spectrums,fooofed_spectrum);
     ap_fit = cat(1,fooof_results.ap_fit);ap_fits = cat(3,ap_fits,ap_fit);
-    clear error  r_squared  aperiodic_param offset exponent  peak_param gaussian_param power_spectrum  fooofed_spectrum ap_fit 
+    clear error  r_squared  aperiodic_param offset exponent  peak_param gaussian_param power_spectrum  fooofed_spectrum ap_fit
 end
 %% hc
 cd(setpath6);
 resultfile= dir([setpath6,'*.mat']);
 file_name =natsort({resultfile.name}, '[-+]?(NaN|Inf|\d+\.?\d*)');
 errors=[];r_squareds=[];offsets=[];exponents=[];power_spectrums=[];fooofed_spectrums=[];ap_fits=[];
+freqs = [];
 for m=1:length(resultfile)
-load(file_name{m});
+    data = load(fullfile(setpath6, file_name{m}), 'fooof_results');
+    fooof_results = data.fooof_results;
+    if isempty(freqs)
+        freqs = get_freqs_from_fooof_results(fooof_results);
+    end
     error = cat(1,fooof_results.error); errors = [errors,error];
     r_squared = cat(1,fooof_results.r_squared); r_squareds = [r_squareds,r_squared];
     aperiodic_param = cat(1,fooof_results.aperiodic_params);
     offset = aperiodic_param(:,1); offsets = [offsets,offset];
     exponent = aperiodic_param(:,2); exponents =[exponents,exponent];
-    peak_param = cat(1,fooof_results.peak_params);gaussian_param= cat(1,fooof_results.gaussian_params);%由于每个通道的峰值参数和高斯参数维度不一致，故不能组建矩阵
+    peak_param = cat(1,fooof_results.peak_params);gaussian_param= cat(1,fooof_results.gaussian_params);%由于每个通道的峰值参数和
+高斯参数维度不一致，故不能组建矩阵
     power_spectrum = cat(1,fooof_results.power_spectrum);power_spectrums = cat(3,power_spectrums,power_spectrum);
     fooofed_spectrum = cat(1,fooof_results.fooofed_spectrum);fooofed_spectrums = cat(3,fooofed_spectrums,fooofed_spectrum);
     ap_fit = cat(1,fooof_results.ap_fit);ap_fits = cat(3,ap_fits,ap_fit);
-    clear error  r_squared  aperiodic_param offset exponent  peak_param  power_spectrum  fooofed_spectrum ap_fit 
+    clear error  r_squared  aperiodic_param offset exponent  peak_param  power_spectrum  fooofed_spectrum ap_fit
 end
 %% pd off
 cd(setpath7);
 resultfile= dir([setpath7,'*.mat']);
 file_name =natsort({resultfile.name}, '[-+]?(NaN|Inf|\d+\.?\d*)');
 errors=[];r_squareds=[];offsets=[];exponents=[];power_spectrums=[];fooofed_spectrums=[];ap_fits=[];
+freqs = [];
 for m=1:length(resultfile)
-load(file_name{m});
+    data = load(fullfile(setpath7, file_name{m}), 'fooof_results');
+    fooof_results = data.fooof_results;
+    if isempty(freqs)
+        freqs = get_freqs_from_fooof_results(fooof_results);
+    end
     error = cat(1,fooof_results.error); errors = [errors,error];
     r_squared = cat(1,fooof_results.r_squared); r_squareds = [r_squareds,r_squared];
     aperiodic_param = cat(1,fooof_results.aperiodic_params);
     offset = aperiodic_param(:,1); offsets = [offsets,offset];
     exponent = aperiodic_param(:,2); exponents =[exponents,exponent];
-    peak_param = cat(1,fooof_results.peak_params);gaussian_param= cat(1,fooof_results.gaussian_params);%由于每个通道的峰值参数和高斯参数维度不一致，故不能组建矩阵
+    peak_param = cat(1,fooof_results.peak_params);gaussian_param= cat(1,fooof_results.gaussian_params);%由于每个通道的峰值参数和
+高斯参数维度不一致，故不能组建矩阵
     power_spectrum = cat(1,fooof_results.power_spectrum);power_spectrums = cat(3,power_spectrums,power_spectrum);
     fooofed_spectrum = cat(1,fooof_results.fooofed_spectrum);fooofed_spectrums = cat(3,fooofed_spectrums,fooofed_spectrum);
     ap_fit = cat(1,fooof_results.ap_fit);ap_fits = cat(3,ap_fits,ap_fit);
-    clear error  r_squared  aperiodic_param offset exponent  peak_param  power_spectrum  fooofed_spectrum ap_fit 
+    clear error  r_squared  aperiodic_param offset exponent  peak_param  power_spectrum  fooofed_spectrum ap_fit
 end
 
 
@@ -71,18 +93,24 @@ cd(setpath8);
 resultfile= dir([setpath8,'*.mat']);
 file_name =natsort({resultfile.name}, '[-+]?(NaN|Inf|\d+\.?\d*)');
 errors=[];r_squareds=[];offsets=[];exponents=[];power_spectrums=[];fooofed_spectrums=[];ap_fits=[];
+freqs = [];
 for m=1:length(resultfile)
-load(file_name{m});
+    data = load(fullfile(setpath8, file_name{m}), 'fooof_results');
+    fooof_results = data.fooof_results;
+    if isempty(freqs)
+        freqs = get_freqs_from_fooof_results(fooof_results);
+    end
     error = cat(1,fooof_results.error); errors = [errors,error];
     r_squared = cat(1,fooof_results.r_squared); r_squareds = [r_squareds,r_squared];
     aperiodic_param = cat(1,fooof_results.aperiodic_params);
     offset = aperiodic_param(:,1); offsets = [offsets,offset];
     exponent = aperiodic_param(:,2); exponents =[exponents,exponent];
-    peak_param = cat(1,fooof_results.peak_params);gaussian_param= cat(1,fooof_results.gaussian_params);%由于每个通道的峰值参数和高斯参数维度不一致，故不能组建矩阵
+    peak_param = cat(1,fooof_results.peak_params);gaussian_param= cat(1,fooof_results.gaussian_params);%由于每个通道的峰值参数和
+高斯参数维度不一致，故不能组建矩阵
     power_spectrum = cat(1,fooof_results.power_spectrum);power_spectrums = cat(3,power_spectrums,power_spectrum);
     fooofed_spectrum = cat(1,fooof_results.fooofed_spectrum);fooofed_spectrums = cat(3,fooofed_spectrums,fooofed_spectrum);
     ap_fit = cat(1,fooof_results.ap_fit);ap_fits = cat(3,ap_fits,ap_fit);
-    clear error  r_squared  aperiodic_param offset exponent  peak_param  power_spectrum  fooofed_spectrum ap_fit 
+    clear error  r_squared  aperiodic_param offset exponent  peak_param  power_spectrum  fooofed_spectrum ap_fit
 end
 %% Channel average
 mean_r_squared = mean(r_squareds,1)';
@@ -124,7 +152,7 @@ mean_powerflatten_spectrum= log10(u);
 mean_r_squared = mean(r_squareds,2);
 mean_errors = mean(errors,2);
 mean_exponents = mean(exponents,2);
-mean_offsets = mean(offsets,2)
+mean_offsets = mean(offsets,2);
 %% figure test
 figure; topoplot(a,EEGchanlocs,'shading','interp','numcontour',5,'style','both','electrodes','on','chaninfo',EEGchaninfo,'drawaxis','off');...
     title('hcvson_offsets');

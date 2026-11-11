@@ -9,9 +9,13 @@ cd(setpath5);
 cd(setpath5);
 resultfile= dir([setpath5,'*.mat']);
 file_name =natsort({resultfile.name}, '[-+]?(NaN|Inf|\d+\.?\d*)');
-errors=[];r_squareds=[];offsets=[];exponents=[];power_spectrums=[];fooofed_spectrums=[];ap_fits=[];
+errors=[];r_squareds=[];offsets=[];exponents=[];power_spectrums=[];fooofed_spectrums=[];ap_fits=[];freqs = [];
 for m=1:length(resultfile)
-load(file_name{m});
+    data = load(fullfile(setpath5, file_name{m}), 'fooof_results');
+    fooof_results = data.fooof_results;
+    if isempty(freqs)
+        freqs = get_freqs_from_fooof_results(fooof_results);
+    end
     error = cat(1,fooof_results.error); errors = [errors,error];
     r_squared = cat(1,fooof_results.r_squared); r_squareds = [r_squareds,r_squared];
     aperiodic_param = cat(1,fooof_results.aperiodic_params);
@@ -22,13 +26,14 @@ load(file_name{m});
     power_spectrum = cat(1,fooof_results.power_spectrum);power_spectrums = cat(3,power_spectrums,power_spectrum);
     fooofed_spectrum = cat(1,fooof_results.fooofed_spectrum);fooofed_spectrums = cat(3,fooofed_spectrums,fooofed_spectrum);
     ap_fit = cat(1,fooof_results.ap_fit);ap_fits = cat(3,ap_fits,ap_fit);
-    clear error  r_squared  aperiodic_param offset exponent  peak_param gaussian_param power_spectrum  fooofed_spectrum ap_fit 
+    clear error  r_squared  aperiodic_param offset exponent  peak_param gaussian_param power_spectrum  fooofed_spectrum ap_fit
 end
 %% Average for all channels
 a=db2pow(ap_fits);%Return linear scale
 b = mean(a,1);
 c=squeeze(b);
 mean_ap_fits=log10(c);%Return logarithmic scale
+freq_vector = freqs(:);
 figure;plot(freqs,c);
 figure;plot(log10(freqs),mean_ap_fits);
 
@@ -56,43 +61,44 @@ mean_powerflatten_spectrum= log10(u);
 %test
 figure;plot((freqs),u);
 
-area=int(c,freqs,2,4)
+freq_mask = freq_vector >= 2 & freq_vector <= 4;
+area=trapz(freq_vector(freq_mask), c(freq_mask, :));
 %% power values extraction
 
 raw_power=[];
-for i= 1:46 
-rawpower=o(:,i);
-rp1=bandpower(rawpower, freqs,[13,35], 'psd');
-raw_power=[raw_power;rp1];
+for i= 1:46
+    rawpower=o(:,i);
+    rp1=bandpower(rawpower(:), freq_vector,[13,35], 'psd');
+    raw_power=[raw_power;rp1];
 end
 
 
 fit_power=[];
-for i= 1:46 
-fitpower=z(:,i)
-rp2=bandpower(fitpower, freqs,[13,35], 'psd');
-fit_power=[fit_power;rp2];
+for i= 1:46
+    fitpower=z(:,i);
+    rp2=bandpower(fitpower(:), freq_vector,[13,35], 'psd');
+    fit_power=[fit_power;rp2];
 end
 
 fooofflatten_power=[];
-for i= 1:46 
-fooofflattenpower=w(:,i)
-rp3=bandpower(fooofflattenpower, freqs,[13,35], 'psd');
-fooofflatten_power=[fooofflatten_power;rp3];
+for i= 1:46
+    fooofflattenpower=w(:,i);
+    rp3=bandpower(fooofflattenpower(:), freq_vector,[13,35], 'psd');
+    fooofflatten_power=[fooofflatten_power;rp3];
 end
 
 powerflatten_power=[];
-for i= 1:46 
-powerflattenpower=u(:,i)
-rp4=bandpower(powerflattenpower, freqs,[13,35], 'psd');
-powerflatten_power=[powerflatten_power;rp4];
+for i= 1:46
+    powerflattenpower=u(:,i);
+    rp4=bandpower(powerflattenpower(:), freq_vector,[13,35], 'psd');
+    powerflatten_power=[powerflatten_power;rp4];
 end
 
 apfit=[];
-for i= 1:46 
-ap_fit=c(:,i)
-rp5=bandpower(ap_fit, freqs,[13,35], 'psd');
-apfit=[apfit;rp5];
+for i= 1:46
+    ap_fit=c(:,i);
+    rp5=bandpower(ap_fit(:), freq_vector,[13,35], 'psd');
+    apfit=[apfit;rp5];
 end
 
 clear rp1 rp2 rp3 rp4 rp5
